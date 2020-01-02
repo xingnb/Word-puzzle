@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			canvas{
+				display: none;
+			}
+			#imgRes{
+				width: 1000px;
+			}
+		</style>
+	</head>
+	<body>
+		<input id="text" type="text">
+		<br><br>
+		<input id="file" type="file" onchange="fileChange()" accept="image/*">
+		<br><br>
+		<img id="imgRes">
+		<canvas id="canvas1"></canvas>
+		<canvas id="canvas2"></canvas>
+	</body>
+	<script type="text/javascript">
+		
+		var canvas = document.querySelector("#canvas1")
+		var ctx = canvas.getContext("2d")
+		//传入文字,和字体大小
+		function render(str,size,colors,w,h){
+			canvas.width = size*w;
+			canvas.height = size*h;
+			ctx.fillStyle = "#ffffff"
+			ctx.fillRect(0,0,canvas.width,canvas.height)
+			ctx.font = `${size}px serif`;
+			let textArr = str.split('');
+     
+			let k = 0;
+			for(let i=0;i<colors.length;i++) {
+				if(k == 0) {
+					k = 0;
+				}else if(k >= textArr.length) {
+					k = 0;
+				}
+				let x = i%w
+				let y = Math.floor(i/w)
+				ctx.fillStyle = colors[i];
+				ctx.fillText(textArr[k],x*size, y*size+size)
+				k++;
+			}
+			let img = document.querySelector("#imgRes")
+			img.src = canvas.toDataURL('image/png')		
+		}
+		
+		var canvas2 = document.querySelector("#canvas2")
+		var ctx2 = canvas2.getContext("2d")
+		
+		
+		let img = document.createElement("img");
+		// img.src="./134.JPG"
+		img.onload = function(e){
+			let w_h = img.width/img.height;
+			canvas2.width = 500;
+			canvas2.height = Math.round(canvas2.width/w_h);
+			ctx2.drawImage(img,0,0,img.width,img.height,0,0,canvas2.width,canvas2.height);
+			let imageData = ctx2.getImageData(0,0,canvas2.width,canvas2.height)
+			let colors = [];
+			for (let i=0;i<imageData.data.length;i+=4) {
+				colors.push(`rgba(${imageData.data[i]},${imageData.data[i+1]},${imageData.data[i+2]},1)`)
+			}
+			let text = document.querySelector("#text").value || "我喜欢你"
+			render(text,12,colors,canvas2.width,canvas2.height)
+		}
+     
+	    function fileChange(){
+			var reads = new FileReader();
+			 f = document.getElementById('file').files[0];
+			 reads.readAsDataURL(f);
+			 reads.onload = function(e) {
+				 img.src = this.result;
+			 };
+		}	
+	</script>
+</html>
